@@ -16,20 +16,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class password extends AppCompatActivity {
@@ -42,7 +32,7 @@ public class password extends AppCompatActivity {
         Cipher c = Cipher.getInstance(ALGORITHM);
         c.init(Cipher.ENCRYPT_MODE, key);
         byte[] encValue = c.doFinal(valueToEnc.getBytes());
-        String encryptedValue = new String(encValue, StandardCharsets.UTF_8);
+        String encryptedValue = Base64.getEncoder().encodeToString(encValue);
         return encryptedValue;
     }
 
@@ -50,15 +40,14 @@ public class password extends AppCompatActivity {
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGORITHM);
         c.init(Cipher.DECRYPT_MODE, key);
-        byte[] decordedValue = encryptedValue.getBytes();
+        byte[] decordedValue = Base64.getDecoder().decode(encryptedValue.trim());
         byte[] decValue = c.doFinal(decordedValue);
         String decryptedValue = new String(decValue);
         return decryptedValue;
     }
 
-    private static Key generateKey() throws Exception {
-        Key key = new SecretKeySpec(keyValue, ALGORITHM);
-        return key;
+    private static Key generateKey() {
+        return new SecretKeySpec(keyValue, ALGORITHM);
     }
 
     EditText EditText1;
@@ -76,11 +65,16 @@ public class password extends AppCompatActivity {
             public void onClick(View view) {
                 EditText1 = (EditText) findViewById(R.id.password);
                 String pass = EditText1.getText().toString();
-                String encodedText = open("Note1.txt", pass);
-                if (encodedText == null) {
-                    encodedText = "";
+                String decodedText = null;
+                try {
+                    decodedText = open(pass);
+                } catch (Exception e) {
+                    Toast.makeText(password.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-                String noteText = encodedText + EditText1.getText().toString();
+                if (decodedText == null) {
+                    decodedText = "";
+                }
+                String noteText = decodedText;
                 Intent intent = new Intent(password.this, MainActivity.class);
                 intent.putExtra("NOTE_TEXT", noteText);
                 startActivityForResult(intent, 200);
@@ -94,9 +88,7 @@ public class password extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
             if (requestCode == 200 && resultCode == RESULT_OK) {
                 String noteText = data.getStringExtra("NOTE_TEXT");
-                Toast.makeText(password.this, noteText,
-                        Toast.LENGTH_SHORT).show();
-
+                save(noteText);
             }
         } catch (Exception ex) {
             Toast.makeText(password.this, ex.toString(),
@@ -105,11 +97,12 @@ public class password extends AppCompatActivity {
 
     }
 
-    public void save(String fileName) {
+    public void save(String text) {
         try {
             OutputStreamWriter out =
-                    new OutputStreamWriter(openFileOutput(fileName, 0));
-            out.write(EditText1.getText().toString());
+                    new OutputStreamWriter(openFileOutput("Note1.txt", 0));
+            String encText = encrypt(text);
+            out.write(encText);
             out.close();
             Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
         } catch (Throwable t) {
@@ -118,8 +111,9 @@ public class password extends AppCompatActivity {
     }
 
 
-    public String open(String fileName, String password) {
+    public String open(String password) throws Exception {
         String content = "";
+        String fileName = "Note1.txt";
         if (FileExists(fileName)) {
             try {
                 InputStream in = openFileInput(fileName);
@@ -134,12 +128,12 @@ public class password extends AppCompatActivity {
                     in.close();
                     content = buf.toString();
                 }
-            } catch (java.io.FileNotFoundException e) {
             } catch (Throwable t) {
                 Toast.makeText(this, "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
             }
         }
-        return content;
+        String decrypted_content = decrypt(content);
+        return decrypted_content;
     }
 
 

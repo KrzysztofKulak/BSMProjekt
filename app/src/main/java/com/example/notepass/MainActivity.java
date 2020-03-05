@@ -13,13 +13,6 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
-import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 
 public class MainActivity extends AppCompatActivity {
     EditText EditText1;
@@ -33,7 +26,6 @@ public class MainActivity extends AppCompatActivity {
         EditText1 = (EditText) findViewById(R.id.EditText1);
         String noteText = getIntent().getStringExtra("NOTE_TEXT");
         EditText1.setText(noteText);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,23 +38,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-    }
-
-    public void save(String fileName, String pass) {
-        try {
-            OutputStreamWriter out =
-                    new OutputStreamWriter(openFileOutput(fileName, 0));
-            out.write(EditText1.getText().toString());
-            out.close();
-            Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
-        } catch (Throwable t) {
-            Toast.makeText(this, "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public boolean FileExists(String fname) {
-        File file = getBaseContext().getFileStreamPath(fname);
-        return file.exists();
     }
 
     @Override
