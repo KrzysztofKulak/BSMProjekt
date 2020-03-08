@@ -25,15 +25,12 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class password extends AppCompatActivity {
     private static final String ALGORITHM = "AES";
-    private static final byte[] keyValue =
-            new byte[]{'T', 'h', 'i', 's', 'I', 's', 'A', 'S', 'e', 'c', 'r', 'e', 't', 'K', 'e', 'y'};
+    private static byte[] keyValue;
 
     private SharedPreferences sharedPreferences;
 
@@ -70,9 +67,6 @@ public class password extends AppCompatActivity {
         }
         PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
         return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
-//        Cipher aes = Cipher.getInstance("AES");
-//        aes.init(Cipher.ENCRYPT_MODE, key);
-//        return new SecretKeySpec(keyValue, ALGORITHM);
     }
 
     EditText EditText1;
@@ -89,20 +83,24 @@ public class password extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 EditText1 = (EditText) findViewById(R.id.password);
-                String pass = EditText1.getText().toString();
+                keyValue = EditText1.getText().toString().getBytes();
                 String decodedText = null;
                 try {
-                    decodedText = open(pass);
+                    decodedText = open();
+                    if (decodedText == null) {
+                        decodedText = "";
+                    }
+                    String noteText = decodedText;
+                    Intent intent = new Intent(password.this, MainActivity.class);
+                    intent.putExtra("NOTE_TEXT", noteText);
+                    startActivityForResult(intent, 200);
+                } catch (javax.crypto.BadPaddingException e) {
+                    Toast.makeText(password.this, "Password incorrect", Toast.LENGTH_SHORT).show();
+                } catch (java.security.spec.InvalidKeySpecException e) {
+                    Toast.makeText(password.this, "Password field empty", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     Toast.makeText(password.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-                if (decodedText == null) {
-                    decodedText = "";
-                }
-                String noteText = decodedText;
-                Intent intent = new Intent(password.this, MainActivity.class);
-                intent.putExtra("NOTE_TEXT", noteText);
-                startActivityForResult(intent, 200);
             }
         });
     }
@@ -136,7 +134,7 @@ public class password extends AppCompatActivity {
     }
 
 
-    public String open(String password) throws Exception {
+    public String open() throws Exception {
         String content = "";
         String fileName = "Note1.txt";
         if (FileExists(fileName)) {
