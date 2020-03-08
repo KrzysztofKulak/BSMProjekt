@@ -56,23 +56,17 @@ public class password extends AppCompatActivity {
         return decryptedValue;
     }
 
-    Key generateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private Key generateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
         sharedPreferences = this.getSharedPreferences("pl.notepass", Context.MODE_PRIVATE);
-        byte[] salt = null;
+        byte[] salt = new byte[16];
         if (sharedPreferences.getString("salt", null) == null) {
             SecureRandom sr = SecureRandom.getInstanceStrong();
-            salt = new byte[16];
             sr.nextBytes(salt);
-            String saltString = Base64.getEncoder().encodeToString(salt);
+            String saltString = new String(salt);
             sharedPreferences.edit().putString("salt", saltString).apply();
-            PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
-            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
-        } else {
-            String saltString = sharedPreferences.getString("salt", "");
-            salt = Base64.getDecoder().decode(saltString.trim());
-            PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
-            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
         }
+        PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
+        return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
     }
 
     EditText EditText1;
