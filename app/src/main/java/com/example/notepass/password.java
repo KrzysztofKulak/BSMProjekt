@@ -1,6 +1,8 @@
 package com.example.notepass;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,15 +19,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class password extends AppCompatActivity {
     private static final String ALGORITHM = "AES";
     private static final byte[] keyValue =
             new byte[]{'T', 'h', 'i', 's', 'I', 's', 'A', 'S', 'e', 'c', 'r', 'e', 't', 'K', 'e', 'y'};
+
+    private SharedPreferences sharedPreferences;
 
     public String encrypt(String valueToEnc) throws Exception {
         Key key = generateKey();
@@ -37,6 +47,9 @@ public class password extends AppCompatActivity {
     }
 
     public String decrypt(String encryptedValue) throws Exception {
+        if(encryptedValue == null || encryptedValue.length() == 0) {
+            return "";
+        }
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGORITHM);
         c.init(Cipher.DECRYPT_MODE, key);
@@ -46,8 +59,20 @@ public class password extends AppCompatActivity {
         return decryptedValue;
     }
 
-    private static Key generateKey() {
-        return new SecretKeySpec(keyValue, ALGORITHM);
+    private Key generateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        sharedPreferences = this.getSharedPreferences("pl.notepass", Context.MODE_PRIVATE);
+        byte[] salt = new byte[16];
+        if (sharedPreferences.getString("salt", null) == null) {
+            SecureRandom sr = SecureRandom.getInstanceStrong();
+            sr.nextBytes(salt);
+            String saltString = new String(salt);
+            sharedPreferences.edit().putString("salt", saltString).apply();
+        }
+        PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
+        return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
+//        Cipher aes = Cipher.getInstance("AES");
+//        aes.init(Cipher.ENCRYPT_MODE, key);
+//        return new SecretKeySpec(keyValue, ALGORITHM);
     }
 
     EditText EditText1;
