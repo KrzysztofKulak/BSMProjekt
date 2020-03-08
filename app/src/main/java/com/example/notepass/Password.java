@@ -28,7 +28,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-public class password extends AppCompatActivity {
+public class Password extends AppCompatActivity {
     private static final String ALGORITHM = "AES";
     private static byte[] keyValue;
 
@@ -97,15 +97,15 @@ public class password extends AppCompatActivity {
                         decodedText = "";
                     }
                     String noteText = decodedText;
-                    Intent intent = new Intent(password.this, MainActivity.class);
+                    Intent intent = new Intent(Password.this, MainActivity.class);
                     intent.putExtra("NOTE_TEXT", noteText);
                     startActivityForResult(intent, 200);
                 } catch (javax.crypto.BadPaddingException e) {
-                    Toast.makeText(password.this, "Password incorrect", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Password.this, "Password incorrect", Toast.LENGTH_SHORT).show();
                 } catch (java.security.spec.InvalidKeySpecException e) {
-                    Toast.makeText(password.this, "Password field empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Password.this, "Password field empty", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
-                    Toast.makeText(password.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Password.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -120,7 +120,7 @@ public class password extends AppCompatActivity {
                 save(noteText);
             }
         } catch (Exception ex) {
-            Toast.makeText(password.this, ex.toString(),
+            Toast.makeText(Password.this, ex.toString(),
                     Toast.LENGTH_SHORT).show();
         } finally {
             EditText1 = (EditText) findViewById(R.id.password);
