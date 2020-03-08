@@ -116,6 +116,9 @@ public class password extends AppCompatActivity {
         } catch (Exception ex) {
             Toast.makeText(password.this, ex.toString(),
                     Toast.LENGTH_SHORT).show();
+        } finally {
+            EditText1 = (EditText) findViewById(R.id.password);
+            EditText1.setText("");
         }
 
     }
