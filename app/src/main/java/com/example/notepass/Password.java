@@ -26,30 +26,49 @@ import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 
 public class Password extends AppCompatActivity {
-    private static final String ALGORITHM = "AES";
+    private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static byte[] keyValue;
 
     private SharedPreferences sharedPreferences;
 
+    public byte[] getIv() {
+        byte[] iv = null;
+        if (sharedPreferences.getString("iv", null) == null) {
+            int ivSize = 16;
+            iv = new byte[ivSize];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(iv);
+            String ivString = Base64.getEncoder().encodeToString(iv);
+            sharedPreferences.edit().putString("iv", ivString).apply();
+        } else {
+            String ivString = sharedPreferences.getString("iv", "");
+            iv = Base64.getDecoder().decode(ivString.trim());
+        }
+        return iv;
+    }
+
     public String encrypt(String valueToEnc) throws Exception {
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGORITHM);
-        c.init(Cipher.ENCRYPT_MODE, key);
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(getIv());
+        c.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec);
         byte[] encValue = c.doFinal(valueToEnc.getBytes());
         String encryptedValue = Base64.getEncoder().encodeToString(encValue);
         return encryptedValue;
     }
 
     public String decrypt(String encryptedValue) throws Exception {
-        if(encryptedValue == null || encryptedValue.length() == 0) {
+        if (encryptedValue == null || encryptedValue.length() == 0) {
             return "";
         }
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGORITHM);
-        c.init(Cipher.DECRYPT_MODE, key);
+        IvParameterSpec ivParameterSpec = new IvParameterSpec(getIv());
+        c.init(Cipher.DECRYPT_MODE, key, ivParameterSpec);
         byte[] decordedValue = Base64.getDecoder().decode(encryptedValue.trim());
         byte[] decValue = c.doFinal(decordedValue);
         String decryptedValue = new String(decValue);
@@ -65,14 +84,12 @@ public class Password extends AppCompatActivity {
             sr.nextBytes(salt);
             String saltString = Base64.getEncoder().encodeToString(salt);
             sharedPreferences.edit().putString("salt", saltString).apply();
-            PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
-            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
         } else {
             String saltString = sharedPreferences.getString("salt", "");
             salt = Base64.getDecoder().decode(saltString.trim());
-            PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
-            return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
         }
+        PBEKeySpec spec = new PBEKeySpec(new String(keyValue).toCharArray(), salt, 1000, 128);
+        return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1").generateSecret(spec);
     }
 
     EditText EditText1;
