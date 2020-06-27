@@ -34,10 +34,14 @@ public class Password extends AppCompatActivity {
     private static byte[] keyValue;
 
     private SharedPreferences sharedPreferences;
+    private boolean changePassword = false;
+    private String textForReencoding;
+
 
     public byte[] getIv() {
         byte[] iv = null;
-        if (sharedPreferences.getString("iv", null) == null) {
+        if (sharedPreferences.getString("iv", null) == null || changePassword) {
+            // generate iv if not present
             int ivSize = 16;
             iv = new byte[ivSize];
             SecureRandom random = new SecureRandom();
@@ -69,8 +73,8 @@ public class Password extends AppCompatActivity {
         Cipher c = Cipher.getInstance(ALGORITHM);
         IvParameterSpec ivParameterSpec = new IvParameterSpec(getIv());
         c.init(Cipher.DECRYPT_MODE, key, ivParameterSpec);
-        byte[] decordedValue = Base64.getDecoder().decode(encryptedValue.trim());
-        byte[] decValue = c.doFinal(decordedValue);
+        byte[] decodedValue = Base64.getDecoder().decode(encryptedValue.trim());
+        byte[] decValue = c.doFinal(decodedValue);
         String decryptedValue = new String(decValue);
         return decryptedValue;
     }
@@ -78,7 +82,8 @@ public class Password extends AppCompatActivity {
     Key generateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
         sharedPreferences = this.getSharedPreferences("pl.notepass", Context.MODE_PRIVATE);
         byte[] salt = null;
-        if (sharedPreferences.getString("salt", null) == null) {
+        if (sharedPreferences.getString("salt", null) == null || changePassword) {
+            // generate salt if not present
             SecureRandom sr = SecureRandom.getInstanceStrong();
             salt = new byte[16];
             sr.nextBytes(salt);
@@ -109,9 +114,15 @@ public class Password extends AppCompatActivity {
                 keyValue = EditText1.getText().toString().getBytes();
                 String decodedText = null;
                 try {
-                    decodedText = open();
-                    if (decodedText == null) {
-                        decodedText = "";
+                    if (changePassword) {
+                        decodedText = textForReencoding;
+                        changePassword = false;
+                        textForReencoding = null;
+                    } else {
+                        decodedText = open();
+                        if (decodedText == null) {
+                            decodedText = "";
+                        }
                     }
                     String noteText = decodedText;
                     Intent intent = new Intent(Password.this, MainActivity.class);
@@ -134,6 +145,10 @@ public class Password extends AppCompatActivity {
             super.onActivityResult(requestCode, resultCode, data);
             if (requestCode == 200 && resultCode == RESULT_OK) {
                 String noteText = data.getStringExtra("NOTE_TEXT");
+                if (data.getStringExtra("CHANGE_PASSWORD") != null) {
+                    changePassword = data.getStringExtra("CHANGE_PASSWORD").equals("CHANGE");
+                    textForReencoding = noteText;
+                }
                 save(noteText);
             }
         } catch (Exception ex) {

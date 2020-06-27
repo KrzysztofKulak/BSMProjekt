@@ -35,6 +35,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String noteText = EditText1.getText().toString();
+                Intent intent = new Intent(MainActivity.this, Password.class);
+                intent.putExtra("NOTE_TEXT", noteText);
+                intent.putExtra("CHANGE_PASSWORD", "CHANGE");
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
+
     }
 
 }
