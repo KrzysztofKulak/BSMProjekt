@@ -17,14 +17,14 @@ public class NoteDisplayer extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_displayer);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        EditText1 = (EditText) findViewById(R.id.EditText1);
+        EditText1 = findViewById(R.id.EditText1);
         String noteText = getIntent().getStringExtra("NOTE_TEXT");
         EditText1.setText(noteText);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton save = findViewById(R.id.save);
+        save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String noteText = EditText1.getText().toString();
@@ -35,8 +35,8 @@ public class NoteDisplayer extends AppCompatActivity {
             }
         });
 
-        FloatingActionButton fab2 = (FloatingActionButton) findViewById(R.id.fab2);
-        fab2.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton saveAndChangePassword = findViewById(R.id.save_and_change_password);
+        saveAndChangePassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String noteText = EditText1.getText().toString();
