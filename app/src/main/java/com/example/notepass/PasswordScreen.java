@@ -157,7 +157,7 @@ public class PasswordScreen extends AppCompatActivity {
             Toast.makeText(PasswordScreen.this, ex.toString(),
                     Toast.LENGTH_SHORT).show();
         } finally {
-            EditText1 = (EditText) findViewById(R.id.password);
+            EditText1 = findViewById(R.id.password);
             EditText1.setText("");
         }
 
@@ -170,7 +170,11 @@ public class PasswordScreen extends AppCompatActivity {
             String encText = encrypt(text);
             out.write(encText);
             out.close();
-            Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
+            if (changePassword) {
+                Toast.makeText(this, "Provide new password!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
+            }
         } catch (Throwable t) {
             Toast.makeText(this, "Exception: " + t.toString(), Toast.LENGTH_LONG).show();
         }
