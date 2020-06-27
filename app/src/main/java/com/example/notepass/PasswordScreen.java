@@ -29,7 +29,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 
-public class Password extends AppCompatActivity {
+public class PasswordScreen extends AppCompatActivity {
     private static final String ALGORITHM = "AES/CBC/PKCS5Padding";
     private static byte[] keyValue;
 
@@ -102,7 +102,7 @@ public class Password extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_password);
+        setContentView(R.layout.activity_password_screen);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -112,6 +112,10 @@ public class Password extends AppCompatActivity {
             public void onClick(View view) {
                 EditText1 = (EditText) findViewById(R.id.password);
                 keyValue = EditText1.getText().toString().getBytes();
+                if (keyValue.length == 0) {
+                    Toast.makeText(PasswordScreen.this, "Password field empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 String decodedText = null;
                 try {
                     if (changePassword) {
@@ -125,15 +129,13 @@ public class Password extends AppCompatActivity {
                         }
                     }
                     String noteText = decodedText;
-                    Intent intent = new Intent(Password.this, MainActivity.class);
+                    Intent intent = new Intent(PasswordScreen.this, NoteDisplayer.class);
                     intent.putExtra("NOTE_TEXT", noteText);
                     startActivityForResult(intent, 200);
                 } catch (javax.crypto.BadPaddingException e) {
-                    Toast.makeText(Password.this, "Password incorrect", Toast.LENGTH_SHORT).show();
-                } catch (java.security.spec.InvalidKeySpecException e) {
-                    Toast.makeText(Password.this, "Password field empty", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PasswordScreen.this, "Password incorrect", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
-                    Toast.makeText(Password.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PasswordScreen.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -152,7 +154,7 @@ public class Password extends AppCompatActivity {
                 save(noteText);
             }
         } catch (Exception ex) {
-            Toast.makeText(Password.this, ex.toString(),
+            Toast.makeText(PasswordScreen.this, ex.toString(),
                     Toast.LENGTH_SHORT).show();
         } finally {
             EditText1 = (EditText) findViewById(R.id.password);

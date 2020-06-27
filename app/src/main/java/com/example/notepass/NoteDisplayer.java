@@ -11,12 +11,12 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 
-public class MainActivity extends AppCompatActivity {
+public class NoteDisplayer extends AppCompatActivity {
     EditText EditText1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_note_displayer);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String noteText = EditText1.getText().toString();
-                Intent intent = new Intent(MainActivity.this, Password.class);
+                Intent intent = new Intent(NoteDisplayer.this, PasswordScreen.class);
                 intent.putExtra("NOTE_TEXT", noteText);
                 setResult(RESULT_OK, intent);
                 finish();
@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String noteText = EditText1.getText().toString();
-                Intent intent = new Intent(MainActivity.this, Password.class);
+                Intent intent = new Intent(NoteDisplayer.this, PasswordScreen.class);
                 intent.putExtra("NOTE_TEXT", noteText);
                 intent.putExtra("CHANGE_PASSWORD", "CHANGE");
                 setResult(RESULT_OK, intent);
